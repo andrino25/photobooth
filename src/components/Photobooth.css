@@ -1,0 +1,144 @@
+.photo-booth-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .camera-container {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    border: 8px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #000;
+    margin-bottom: 20px;
+  }
+  
+  .mirror-mode {
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+    object-fit: cover;
+  }
+  
+  .flash-effect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: white;
+    animation: flash 200ms ease-out;
+  }
+  
+  .countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 6rem;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: pulse 1s infinite;
+  }
+  
+  .capture-button {
+    background-color: #e53e3e;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, background-color 0.2s;
+    margin-bottom: 20px;
+  }
+  
+  .capture-button:hover {
+    background-color: #c53030;
+    transform: scale(1.05);
+  }
+  
+  .capture-button:disabled {
+    background-color: #718096;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .photo-card {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    position: relative;
+    width: 640px;
+  }
+  
+  .photo-card::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    border: 2px solid #e2e8f0;
+    pointer-events: none;
+  }
+  
+  .photo-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background-color: white;
+    padding: 20px;
+  }
+  
+  .photo-frame {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    border: 4px solid #e2e8f0;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  @keyframes flash {
+    0% { opacity: 0; }
+    50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  
+  @keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+  }
