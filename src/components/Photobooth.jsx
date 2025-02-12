@@ -4,7 +4,7 @@ import "./Photobooth.css"
 
 const PhotoBooth = () => {
   const [capturing, setCapturing] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(null);
   const [photos, setPhotos] = useState([]);
   const [flash, setFlash] = useState(false);
   const [showFinalCard, setShowFinalCard] = useState(false);
@@ -15,9 +15,7 @@ const PhotoBooth = () => {
 
   useEffect(() => {
     startCamera();
-    return () => {
-      stopCamera();
-    };
+    return () => stopCamera();
   }, [facingMode]);
 
   const stopCamera = () => {
@@ -32,10 +30,10 @@ const PhotoBooth = () => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
-          aspectRatio: 4/3,
+          aspectRatio: 4 / 3,
           width: { ideal: 640 },
-          height: { ideal: 480 }
-        }
+          height: { ideal: 480 },
+        },
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -47,14 +45,13 @@ const PhotoBooth = () => {
   };
 
   const toggleCamera = () => {
-    setFacingMode(current => current === 'user' ? 'environment' : 'user');
+    setFacingMode(current => (current === 'user' ? 'environment' : 'user'));
   };
 
   const startCapturing = () => {
     setPhotos([]);
     setShowFinalCard(false);
     setCapturing(true);
-    setCountdown(3);
     captureSequence(3);
   };
 
@@ -63,11 +60,11 @@ const PhotoBooth = () => {
       setFlash(true);
       setTimeout(() => setFlash(false), 200);
       const context = canvasRef.current.getContext('2d');
-      
-      // Clear the canvas first
+
+      // Clear canvas first
       context.clearRect(0, 0, 640, 480);
-      
-      // If using front camera, flip the image horizontally
+
+      // Flip for front camera
       if (facingMode === 'user') {
         context.save();
         context.scale(-1, 1);
@@ -76,7 +73,7 @@ const PhotoBooth = () => {
       } else {
         context.drawImage(videoRef.current, 0, 0, 640, 480);
       }
-      
+
       const photoData = canvasRef.current.toDataURL('image/jpeg');
       setPhotos(prev => [...prev, photoData]);
     }
@@ -89,65 +86,117 @@ const PhotoBooth = () => {
       return;
     }
 
-    let timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev === 1) {
-          clearInterval(timer);
-          takePhoto();
+    let count = 3;
+    const countdownTimer = setInterval(() => {
+      setCountdown(count);
+      if (count === 1) {
+        setTimeout(() => {
+          clearInterval(countdownTimer);
+          setCountdown('Cheese!');
           setTimeout(() => {
+            takePhoto();
+            setCountdown(null);
             captureSequence(remainingPhotos - 1);
-            setCountdown(3);
-          }, 1000);
-        }
-        return prev - 1;
-      });
+          }, 500);
+        }, 1000);
+      }
+      count--;
     }, 1000);
   };
 
   const downloadPhotos = () => {
+    if (photos.length === 0) return;
+  
     const link = document.createElement('a');
-    link.download = 'photo-strip.jpg';
+    const today = new Date();
+    const timestamp = today.toISOString().replace(/[-:T]/g, '').split('.')[0];
+    link.download = `the-photobooth-${timestamp}.png`; 
+  
+    // Canvas settings
+    const photoWidth = 640;
+    const photoHeight = 480;
+    const padding = 30;
+    const photoGap = 20;
+    const photoFrameBorder = 2;
+    const stripPadding = 8;
+    const borderRadius = 10;
+  
+    // Total height calculation
+    const totalHeight = (photoHeight * 3) + (photoGap * 2) + (padding * 2) + (stripPadding * 2);
     
     const canvas = document.createElement('canvas');
-    canvas.width = 640;
-    canvas.height = 1440; // Increased height for better spacing
+    canvas.width = photoWidth + (padding * 2) + (stripPadding * 2);
+    canvas.height = totalHeight;
     const ctx = canvas.getContext('2d');
-    
-    // Draw white background
-    ctx.fillStyle = 'white';
+  
+    // Apply rounded corners
+    ctx.beginPath();
+    ctx.moveTo(borderRadius, 0);
+    ctx.lineTo(canvas.width - borderRadius, 0);
+    ctx.quadraticCurveTo(canvas.width, 0, canvas.width, borderRadius);
+    ctx.lineTo(canvas.width, canvas.height - borderRadius);
+    ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - borderRadius, canvas.height);
+    ctx.lineTo(borderRadius, canvas.height);
+    ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - borderRadius);
+    ctx.lineTo(0, borderRadius);
+    ctx.quadraticCurveTo(0, 0, borderRadius, 0);
+    ctx.closePath();
+    ctx.clip();
+  
+    // Gradient background
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#ff9a9e");
+    gradient.addColorStop(0.33, "#fad0c4");
+    gradient.addColorStop(0.66, "#fbc2eb");
+    gradient.addColorStop(1, "#a18cd1");
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw border
-    ctx.strokeStyle = '#e2e8f0';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-    
-    // Draw each photo with proper spacing
-    photos.forEach((photo, index) => {
-      const img = new Image();
-      img.src = photo;
-      ctx.drawImage(img, 40, 40 + (index * 460), canvas.width - 80, 440);
+
+  
+    // Photo scaling
+    const scaledPhotoWidth = (canvas.width - (padding * 2) - (stripPadding * 2)) * 0.9;
+    const scaledPhotoHeight = (scaledPhotoWidth * photoHeight) / photoWidth;
+  
+    // Load all images before drawing
+    const imagePromises = photos.map(photo => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.src = photo;
+        img.onload = () => resolve(img);
+      });
     });
-    
-    link.href = canvas.toDataURL('image/jpeg');
-    link.click();
-  };
+  
+    Promise.all(imagePromises).then(images => {
+      images.forEach((img, index) => {
+        const xPos = padding + stripPadding + ((canvas.width - (padding * 2) - (stripPadding * 2) - scaledPhotoWidth) / 2);
+        const yPos = padding + stripPadding + (index * (scaledPhotoHeight + photoGap));
+  
+        // Photo border (frame)
+        ctx.fillStyle = '#e5e7eb';
+        ctx.fillRect(xPos - photoFrameBorder, yPos - photoFrameBorder, 
+                     scaledPhotoWidth + (photoFrameBorder * 2), 
+                     scaledPhotoHeight + (photoFrameBorder * 2));
+  
+        // Draw photo
+        ctx.drawImage(img, xPos, yPos, scaledPhotoWidth, scaledPhotoHeight);
+      });
+  
+      // Export as PNG to preserve transparency
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+    });
+};
+  
 
   return (
-    <div className="photo-booth-container">
+    <div className={`photo-booth-container ${showFinalCard ? 'showing-final' : ''}`}>
       <h1 className="title">DIGITAL PHOTO BOOTH</h1>
-      
+
       {!showFinalCard && (
         <div className="camera-container">
-          <video 
-            ref={videoRef} 
-            autoPlay 
-            playsInline 
-            muted 
-            className={facingMode === 'user' ? 'mirror-mode' : ''} 
-          />
+          <video ref={videoRef} autoPlay playsInline muted className={facingMode === 'user' ? 'mirror-mode' : ''} />
           {flash && <div className="flash-effect" />}
-          {capturing && <div className="countdown">{countdown}</div>}
+          {countdown !== null && <div className="countdown">{countdown}</div>}
         </div>
       )}
 
@@ -181,7 +230,7 @@ const PhotoBooth = () => {
           </div>
         </>
       )}
-      
+
       <canvas ref={canvasRef} width="640" height="480" className="hidden" />
     </div>
   );
