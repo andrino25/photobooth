@@ -37,6 +37,51 @@
     object-fit: cover;
   }
   
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .capture-button {
+    background-color: #e53e3e;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, background-color 0.2s;
+  }
+  
+  .capture-button.secondary {
+    background-color: #4a5568;
+  }
+  
+  .capture-button:hover {
+    background-color: #c53030;
+    transform: scale(1.05);
+  }
+  
+  .capture-button.secondary:hover {
+    background-color: #2d3748;
+  }
+  
+  .capture-button:disabled {
+    background-color: #718096;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
   .flash-effect {
     position: absolute;
     top: 0;

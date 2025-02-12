@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Download, Image as ImageIcon } from 'lucide-react';
-import "../components/Photobooth.css"
+import { Camera, Download, FlipHorizontal } from 'lucide-react';
+import "./Photobooth.css"
 
 const PhotoBooth = () => {
   const [capturing, setCapturing] = useState(false);
@@ -8,27 +8,46 @@ const PhotoBooth = () => {
   const [photos, setPhotos] = useState([]);
   const [flash, setFlash] = useState(false);
   const [showFinalCard, setShowFinalCard] = useState(false);
+  const [facingMode, setFacingMode] = useState('user');
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const streamRef = useRef(null);
 
   useEffect(() => {
     startCamera();
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
-      }
+      stopCamera();
     };
-  }, []);
+  }, [facingMode]);
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+  };
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stopCamera();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facingMode,
+          aspectRatio: 4/3,
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        }
+      });
+      streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
     }
+  };
+
+  const toggleCamera = () => {
+    setFacingMode(current => current === 'user' ? 'environment' : 'user');
   };
 
   const startCapturing = () => {
@@ -44,7 +63,20 @@ const PhotoBooth = () => {
       setFlash(true);
       setTimeout(() => setFlash(false), 200);
       const context = canvasRef.current.getContext('2d');
-      context.drawImage(videoRef.current, 0, 0, 640, 480);
+      
+      // Clear the canvas first
+      context.clearRect(0, 0, 640, 480);
+      
+      // If using front camera, flip the image horizontally
+      if (facingMode === 'user') {
+        context.save();
+        context.scale(-1, 1);
+        context.drawImage(videoRef.current, -640, 0, 640, 480);
+        context.restore();
+      } else {
+        context.drawImage(videoRef.current, 0, 0, 640, 480);
+      }
+      
       const photoData = canvasRef.current.toDataURL('image/jpeg');
       setPhotos(prev => [...prev, photoData]);
     }
@@ -76,10 +108,9 @@ const PhotoBooth = () => {
     const link = document.createElement('a');
     link.download = 'photo-strip.jpg';
     
-    // Create a canvas for the final photo card
     const canvas = document.createElement('canvas');
     canvas.width = 640;
-    canvas.height = 1200; // Adjust height to fit three photos plus padding
+    canvas.height = 1440; // Increased height for better spacing
     const ctx = canvas.getContext('2d');
     
     // Draw white background
@@ -91,11 +122,11 @@ const PhotoBooth = () => {
     ctx.lineWidth = 4;
     ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
     
-    // Draw each photo
+    // Draw each photo with proper spacing
     photos.forEach((photo, index) => {
       const img = new Image();
       img.src = photo;
-      ctx.drawImage(img, 40, 40 + (index * 380), canvas.width - 80, 360);
+      ctx.drawImage(img, 40, 40 + (index * 460), canvas.width - 80, 440);
     });
     
     link.href = canvas.toDataURL('image/jpeg');
@@ -108,16 +139,27 @@ const PhotoBooth = () => {
       
       {!showFinalCard && (
         <div className="camera-container">
-          <video ref={videoRef} autoPlay playsInline muted className="mirror-mode" />
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            playsInline 
+            muted 
+            className={facingMode === 'user' ? 'mirror-mode' : ''} 
+          />
           {flash && <div className="flash-effect" />}
           {capturing && <div className="countdown">{countdown}</div>}
         </div>
       )}
 
       {!showFinalCard && (
-        <button onClick={startCapturing} disabled={capturing} className="capture-button">
-          <Camera className="icon" /> {capturing ? 'Taking Photos...' : 'Start Photo Session'}
-        </button>
+        <div className="button-group">
+          <button onClick={toggleCamera} className="capture-button secondary">
+            <FlipHorizontal className="icon" /> Switch Camera
+          </button>
+          <button onClick={startCapturing} disabled={capturing} className="capture-button">
+            <Camera className="icon" /> {capturing ? 'Taking Photos...' : 'Start Photo Session'}
+          </button>
+        </div>
       )}
 
       {showFinalCard && photos.length === 3 && (
@@ -129,12 +171,14 @@ const PhotoBooth = () => {
               ))}
             </div>
           </div>
-          <button onClick={downloadPhotos} className="capture-button">
-            <Download className="icon" /> Download Photos
-          </button>
-          <button onClick={startCapturing} className="capture-button">
-            <Camera className="icon" /> Take New Photos
-          </button>
+          <div className="button-group">
+            <button onClick={downloadPhotos} className="capture-button">
+              <Download className="icon" /> Download Photos
+            </button>
+            <button onClick={startCapturing} className="capture-button">
+              <Camera className="icon" /> Take New Photos
+            </button>
+          </div>
         </>
       )}
       
