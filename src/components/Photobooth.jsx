@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Download, Image as ImageIcon } from 'lucide-react';
-import './PhotoBooth.css';
+import "./Photobooth.css"
 
 const PhotoBooth = () => {
   const [capturing, setCapturing] = useState(false);
