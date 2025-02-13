@@ -231,7 +231,7 @@ const PhotoBooth = () => {
         </>
       )}
 
-      <canvas ref={canvasRef} width="600" height="600" className="hidden" />
+      <canvas ref={canvasRef} width="480" height="480" className="hidden" />
     </div>
   );
 };
