@@ -113,8 +113,8 @@ const PhotoBooth = () => {
     link.download = `photobooth-${timestamp}.png`;
   
     // Enhanced canvas settings
-    const photoWidth = 800;
-    const photoHeight = 600;
+    const photoWidth = 480;
+    const photoHeight = 640;
     const padding = 50; // Increased padding for more space around images
     const photoGap = 30; // Increased gap between photos
     const photoFrameBorder = 4;

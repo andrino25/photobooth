@@ -33,7 +33,7 @@ body {
 .camera-container {
   position: relative;
   width: 100%;
-  padding-top: 133%; /* 4:3 Aspect Ratio */
+  padding-top: 100%; /* 4:3 Aspect Ratio */
   background: black;
   border-radius: 10px;
   overflow: hidden;
@@ -145,14 +145,14 @@ video {
 .photo-strip {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
   padding: 0.5rem;
   align-items: center;
   margin-bottom: 4.5rem;
 }
 
 .photo-frame {
-  width: 90%;
+  width: 100%;
   border-radius: 8px;
   border: 2px solid #e5e7eb;
 }
@@ -170,43 +170,11 @@ video {
   }
 }
 
-@media (max-width: 900px) {
-  body {
-    align-items: flex-start; /* Changed from center for better mobile experience */
-    padding: 1rem;
-  }
-
-  .photo-booth-container,
-  .showing-final {
-    max-width: 90%;
-    padding: 1.5rem;
-    margin: 1rem auto; /* Added margin top and bottom */
-  }
-}
-
 @media (max-width: 480px) {
-  body {
-    padding: 0.5rem;
-    min-height: 100vh;
-    /* Remove any margin/padding that might cause scrolling */
-    margin: 0;
-  }
   
   .photo-booth-container,
   .showing-final {
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0.5rem auto;
-    border-radius: 8px; /* Slightly smaller border radius for mobile */
+    max-width: 80%;
   }
-}
 
-/* Fix for iPhone notch areas */
-@supports (padding: max(0px)) {
-  body {
-    padding-left: max(1rem, env(safe-area-inset-left));
-    padding-right: max(1rem, env(safe-area-inset-right));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-    padding-top: max(1rem, env(safe-area-inset-top));
-  }
 }
