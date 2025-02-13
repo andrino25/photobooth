@@ -110,18 +110,17 @@ const PhotoBooth = () => {
     const link = document.createElement('a');
     const today = new Date();
     const timestamp = today.toISOString().replace(/[-:T]/g, '').split('.')[0];
-    link.download = `the-photobooth-${timestamp}.png`; 
+    link.download = `photobooth-${timestamp}.png`;
   
-    // Canvas settings
-    const photoWidth = 640;
-    const photoHeight = 480;
-    const padding = 30;
-    const photoGap = 20;
-    const photoFrameBorder = 2;
-    const stripPadding = 8;
-    const borderRadius = 10;
+    // Enhanced canvas settings
+    const photoWidth = 800; // Increased for better quality
+    const photoHeight = 600;
+    const padding = 40;
+    const photoGap = 25;
+    const photoFrameBorder = 3;
+    const stripPadding = 12;
+    const borderRadius = 16;
   
-    // Total height calculation
     const totalHeight = (photoHeight * 3) + (photoGap * 2) + (padding * 2) + (stripPadding * 2);
     
     const canvas = document.createElement('canvas');
@@ -129,7 +128,7 @@ const PhotoBooth = () => {
     canvas.height = totalHeight;
     const ctx = canvas.getContext('2d');
   
-    // Apply rounded corners
+    // Apply smooth corners
     ctx.beginPath();
     ctx.moveTo(borderRadius, 0);
     ctx.lineTo(canvas.width - borderRadius, 0);
@@ -143,21 +142,26 @@ const PhotoBooth = () => {
     ctx.closePath();
     ctx.clip();
   
-    // Gradient background
+    // Enhanced gradient background
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#ff9a9e");
-    gradient.addColorStop(0.33, "#fad0c4");
-    gradient.addColorStop(0.66, "#fbc2eb");
+    gradient.addColorStop(0.25, "#fad0c4");
+    gradient.addColorStop(0.75, "#fbc2eb");
     gradient.addColorStop(1, "#a18cd1");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   
-    // Photo scaling
-    const scaledPhotoWidth = (canvas.width - (padding * 2) - (stripPadding * 2)) * 0.9;
+    // Add texture overlay
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    for (let i = 0; i < canvas.height; i += 4) {
+      ctx.fillRect(0, i, canvas.width, 2);
+    }
+  
+    // Photo scaling with better quality
+    const scaledPhotoWidth = (canvas.width - (padding * 2) - (stripPadding * 2)) * 0.92;
     const scaledPhotoHeight = (scaledPhotoWidth * photoHeight) / photoWidth;
   
-    // Load all images before drawing
+    // Load and process images
     const imagePromises = photos.map(photo => {
       return new Promise((resolve) => {
         const img = new Image();
@@ -171,21 +175,44 @@ const PhotoBooth = () => {
         const xPos = padding + stripPadding + ((canvas.width - (padding * 2) - (stripPadding * 2) - scaledPhotoWidth) / 2);
         const yPos = padding + stripPadding + (index * (scaledPhotoHeight + photoGap));
   
-        // Photo border (frame)
-        ctx.fillStyle = '#e5e7eb';
-        ctx.fillRect(xPos - photoFrameBorder, yPos - photoFrameBorder, 
-                     scaledPhotoWidth + (photoFrameBorder * 2), 
-                     scaledPhotoHeight + (photoFrameBorder * 2));
+        // Enhanced photo frame
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 4;
+        
+        // White frame
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(
+          xPos - photoFrameBorder - 2,
+          yPos - photoFrameBorder - 2,
+          scaledPhotoWidth + (photoFrameBorder * 2) + 4,
+          scaledPhotoHeight + (photoFrameBorder * 2) + 4
+        );
   
-        // Draw photo
+        // Reset shadow for photo
+        ctx.shadowColor = 'transparent';
+        
+        // Draw photo with smooth edges
+        ctx.save();
+        ctx.beginPath();
+        const photoRadius = 8;
+        ctx.roundRect(xPos, yPos, scaledPhotoWidth, scaledPhotoHeight, photoRadius);
+        ctx.clip();
         ctx.drawImage(img, xPos, yPos, scaledPhotoWidth, scaledPhotoHeight);
+        ctx.restore();
       });
   
-      // Export as PNG to preserve transparency
+      // Add watermark
+      ctx.font = 'bold 16px Inter';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.textAlign = 'center';
+      ctx.fillText('Digital Photo Booth', canvas.width / 2, canvas.height - 20);
+  
+      // Export as PNG with maximum quality
       link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     });
-};
+  };
   
 
   return (
