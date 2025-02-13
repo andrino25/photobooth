@@ -30,9 +30,9 @@ const PhotoBooth = () => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facingMode,
-          aspectRatio: 1,
-          width: { ideal: 600 },
-          height: { ideal: 600 },
+          aspectRatio: 1/1,
+          width: { ideal: 480 },
+          height: { ideal: 480 },
         },
       });
       streamRef.current = stream;
@@ -62,16 +62,16 @@ const PhotoBooth = () => {
       const context = canvasRef.current.getContext('2d');
 
       // Clear canvas first
-      context.clearRect(0, 0, 640, 640); // Updated to square dimensions
+      context.clearRect(0, 0, 480, 480); // Updated to square dimensions
 
       // Flip for front camera
       if (facingMode === 'user') {
         context.save();
         context.scale(-1, 1);
-        context.drawImage(videoRef.current, -640, 0, 640, 640); // Updated to square dimensions
+        context.drawImage(videoRef.current, -480, 0, 480, 480); // Updated to square dimensions
         context.restore();
       } else {
-        context.drawImage(videoRef.current, 0, 0, 640, 640); // Updated to square dimensions
+        context.drawImage(videoRef.current, 0, 0, 480, 480); // Updated to square dimensions
       }
 
       const photoData = canvasRef.current.toDataURL('image/jpeg');
