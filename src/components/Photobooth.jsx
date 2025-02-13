@@ -112,11 +112,10 @@ const PhotoBooth = () => {
     const timestamp = today.toISOString().replace(/[-:T]/g, '').split('.')[0];
     link.download = `photobooth-${timestamp}.png`;
   
-    // Updated canvas settings for square photos
-    const photoSize = 480; // Square size for each photo
+    const photoSize = 480; 
     const padding = 50;
-    const photoGap = 30;
-    const photoFrameBorder = 4;
+    const photoGap = 50;
+    const photoFrameBorder = 2;
     const stripPadding = 15;
     const borderRadius = 16;
     const photoRadius = 12;
@@ -128,7 +127,13 @@ const PhotoBooth = () => {
     canvas.height = totalHeight;
     const ctx = canvas.getContext('2d');
   
-    // ... (gradient and texture code remains the same)
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#ff9a9e");
+    gradient.addColorStop(0.33, "#fad0c4");
+    gradient.addColorStop(0.66, "#fbc2eb");
+    gradient.addColorStop(1, "#a18cd1");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   
     // Photo scaling - updated for square photos
     const scaledPhotoSize = (canvas.width - (padding * 2) - (stripPadding * 2)) * 0.85;
@@ -180,7 +185,6 @@ const PhotoBooth = () => {
         ctx.stroke();
       });
   
-      // ... (watermark code remains the same)
       
       link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
@@ -196,7 +200,7 @@ const PhotoBooth = () => {
         <div className="camera-container">
           <video ref={videoRef} autoPlay playsInline muted className={facingMode === 'user' ? 'mirror-mode' : ''} />
           {flash && <div className="flash-effect" />}
-          {countdown !== null && <div className="countdown">{countdown}</div>}
+          {countdown !== null && <div key = "countdown" className="countdown">{countdown}</div>}
         </div>
       )}
 
