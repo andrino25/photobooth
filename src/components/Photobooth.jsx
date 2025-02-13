@@ -113,13 +113,14 @@ const PhotoBooth = () => {
     link.download = `photobooth-${timestamp}.png`;
   
     // Enhanced canvas settings
-    const photoWidth = 800; // Increased for better quality
+    const photoWidth = 800;
     const photoHeight = 600;
-    const padding = 40;
-    const photoGap = 25;
-    const photoFrameBorder = 3;
-    const stripPadding = 12;
+    const padding = 50; // Increased padding for more space around images
+    const photoGap = 30; // Increased gap between photos
+    const photoFrameBorder = 4;
+    const stripPadding = 15;
     const borderRadius = 16;
+    const photoRadius = 12; // Increased corner radius for photos
   
     const totalHeight = (photoHeight * 3) + (photoGap * 2) + (padding * 2) + (stripPadding * 2);
     
@@ -128,7 +129,7 @@ const PhotoBooth = () => {
     canvas.height = totalHeight;
     const ctx = canvas.getContext('2d');
   
-    // Apply smooth corners
+    // Apply smooth corners to the overall canvas
     ctx.beginPath();
     ctx.moveTo(borderRadius, 0);
     ctx.lineTo(canvas.width - borderRadius, 0);
@@ -157,8 +158,8 @@ const PhotoBooth = () => {
       ctx.fillRect(0, i, canvas.width, 2);
     }
   
-    // Photo scaling with better quality
-    const scaledPhotoWidth = (canvas.width - (padding * 2) - (stripPadding * 2)) * 0.92;
+    // Photo scaling - made slightly smaller
+    const scaledPhotoWidth = (canvas.width - (padding * 2) - (stripPadding * 2)) * 0.85; // Reduced from 0.92
     const scaledPhotoHeight = (scaledPhotoWidth * photoHeight) / photoWidth;
   
     // Load and process images
@@ -175,44 +176,53 @@ const PhotoBooth = () => {
         const xPos = padding + stripPadding + ((canvas.width - (padding * 2) - (stripPadding * 2) - scaledPhotoWidth) / 2);
         const yPos = padding + stripPadding + (index * (scaledPhotoHeight + photoGap));
   
-        // Enhanced photo frame
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-        ctx.shadowBlur = 10;
+        // Draw shadow for the frame
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        ctx.shadowBlur = 12;
         ctx.shadowOffsetY = 4;
         
-        // White frame
+        // Draw rounded rectangle for white frame
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(
-          xPos - photoFrameBorder - 2,
-          yPos - photoFrameBorder - 2,
-          scaledPhotoWidth + (photoFrameBorder * 2) + 4,
-          scaledPhotoHeight + (photoFrameBorder * 2) + 4
+        ctx.beginPath();
+        ctx.roundRect(
+          xPos - photoFrameBorder - 4,
+          yPos - photoFrameBorder - 4,
+          scaledPhotoWidth + (photoFrameBorder * 2) + 8,
+          scaledPhotoHeight + (photoFrameBorder * 2) + 8,
+          photoRadius + photoFrameBorder
         );
+        ctx.fill();
   
         // Reset shadow for photo
         ctx.shadowColor = 'transparent';
         
-        // Draw photo with smooth edges
+        // Draw photo with rounded corners
         ctx.save();
         ctx.beginPath();
-        const photoRadius = 8;
         ctx.roundRect(xPos, yPos, scaledPhotoWidth, scaledPhotoHeight, photoRadius);
         ctx.clip();
         ctx.drawImage(img, xPos, yPos, scaledPhotoWidth, scaledPhotoHeight);
         ctx.restore();
+
+        // Add a subtle border to the photo
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(xPos, yPos, scaledPhotoWidth, scaledPhotoHeight, photoRadius);
+        ctx.stroke();
       });
   
       // Add watermark
       ctx.font = 'bold 16px Inter';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
       ctx.textAlign = 'center';
-      ctx.fillText('Digital Photo Booth', canvas.width / 2, canvas.height - 20);
+      ctx.fillText('Digital Photo Booth', canvas.width / 2, canvas.height - 25);
   
       // Export as PNG with maximum quality
       link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     });
-  };
+};
   
 
   return (
