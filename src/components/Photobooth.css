@@ -127,31 +127,49 @@ video {
   margin-right: 8px;
 }
 
-/* Photo Strip */
+/* Photo Card */
 .photo-card {
+  position: relative;
   margin-top: 20px;
-  background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+  background: #ffffff;
   border-radius: 10px;
   padding-top: 30px;
   padding-bottom: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Photo Strip */
 .photo-strip {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   padding: 0.5rem;
   align-items: center;
   margin-bottom: 4.5rem;
 }
 
+/* Photo Frame */
 .photo-frame {
   width: 80%;
   aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid #e5e7eb;
+}
+
+/* Watermark */
+.watermark {
+  bottom: 10px;
+  right: 10px;
+  width: 50px;
+  border-radius: 10%;
+}
+
+.title-watermark{
+  font-family: Arial, sans-serif;
+  color: black;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Hidden Canvas */

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Download, FlipHorizontal } from 'lucide-react';
-import "./Photobooth.css"
+import "./Photobooth.css";
+import watermark from "../assets/asd.png";
 
 const PhotoBooth = () => {
   const [capturing, setCapturing] = useState(false);
@@ -12,6 +13,7 @@ const PhotoBooth = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
+  const photoCardRef = useRef(null); // New ref for the photo card
 
   useEffect(() => {
     startCamera();
@@ -54,6 +56,11 @@ const PhotoBooth = () => {
     setCapturing(true);
     captureSequence(3);
   };
+
+  const reloadPage = () => {
+    window.location.reload();
+  };
+
 
   const takePhoto = () => {
     if (videoRef.current && canvasRef.current) {
@@ -105,105 +112,48 @@ const PhotoBooth = () => {
   };
 
   const downloadPhotos = () => {
-    if (photos.length === 0) return;
-  
-    const link = document.createElement('a');
-    const today = new Date();
-    const timestamp = today.toISOString().replace(/[-:T]/g, '').split('.')[0];
-    link.download = `photobooth-${timestamp}.png`;
-  
-    const photoSize = 480; 
-    const padding = 50;
-    const photoGap = 50;
-    const photoFrameBorder = 2;
-    const stripPadding = 15;
-    const borderRadius = 16;
-    const photoRadius = 12;
-  
-    const totalHeight = (photoSize * 3) + (photoGap * 2) + (padding * 2) + (stripPadding * 2);
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = photoSize + (padding * 2) + (stripPadding * 2);
-    canvas.height = totalHeight;
-    const ctx = canvas.getContext('2d');
-  
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#ff9a9e");
-    gradient.addColorStop(0.33, "#fad0c4");
-    gradient.addColorStop(0.66, "#fbc2eb");
-    gradient.addColorStop(1, "#a18cd1");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  
-    // Photo scaling - updated for square photos
-    const scaledPhotoSize = (canvas.width - (padding * 2) - (stripPadding * 2)) * 0.85;
-  
-    Promise.all(photos.map(photo => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.src = photo;
-        img.onload = () => resolve(img);
-      });
-    })).then(images => {
-      images.forEach((img, index) => {
-        const xPos = padding + stripPadding + ((canvas.width - (padding * 2) - (stripPadding * 2) - scaledPhotoSize) / 2);
-        const yPos = padding + stripPadding + (index * (scaledPhotoSize + photoGap));
-  
-        // Draw shadow for the frame
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-        ctx.shadowBlur = 12;
-        ctx.shadowOffsetY = 4;
-        
-        // Draw rounded rectangle for white frame
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.roundRect(
-          xPos - photoFrameBorder - 4,
-          yPos - photoFrameBorder - 4,
-          scaledPhotoSize + (photoFrameBorder * 2) + 8,
-          scaledPhotoSize + (photoFrameBorder * 2) + 8,
-          photoRadius + photoFrameBorder
-        );
-        ctx.fill();
-  
-        // Reset shadow for photo
-        ctx.shadowColor = 'transparent';
-        
-        // Draw square photo with rounded corners
-        ctx.save();
-        ctx.beginPath();
-        ctx.roundRect(xPos, yPos, scaledPhotoSize, scaledPhotoSize, photoRadius);
-        ctx.clip();
-        ctx.drawImage(img, xPos, yPos, scaledPhotoSize, scaledPhotoSize);
-        ctx.restore();
+    if (photos.length === 0 || !photoCardRef.current) return;
 
-        // Add subtle border
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.roundRect(xPos, yPos, scaledPhotoSize, scaledPhotoSize, photoRadius);
-        ctx.stroke();
+    // Create a canvas with the same size as the photo card
+    const canvas = document.createElement('canvas');
+    const photoCard = photoCardRef.current;
+    const rect = photoCard.getBoundingClientRect();
+    
+    // Set canvas size to match the photo card
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    // Use html2canvas to capture the photo card (you'll need to install this package)
+    import('html2canvas').then(html2canvas => {
+      html2canvas.default(photoCard, {
+        scale: 2, // Higher quality
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+      }).then(canvas => {
+        // Create download link
+        const link = document.createElement('a');
+        const today = new Date();
+        const timestamp = today.toISOString().replace(/[-:T]/g, '').split('.')[0];
+        link.download = `photobooth-${timestamp}.png`;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
       });
-  
-      
-      link.href = canvas.toDataURL('image/png', 1.0);
-      link.click();
     });
   };
-  
 
   return (
     <div className={`photo-booth-container ${showFinalCard ? 'showing-final' : ''}`}>
       <h1 className="title">DIGITAL PHOTO BOOTH</h1>
-
+  
       {!showFinalCard && (
         <div className="camera-container">
           <video ref={videoRef} autoPlay playsInline muted className={facingMode === 'user' ? 'mirror-mode' : ''} />
           {flash && <div className="flash-effect" />}
-          {countdown !== null && <div key = "countdown" className="countdown">{countdown}</div>}
+          {countdown !== null && <div key="countdown" className="countdown">{countdown}</div>}
         </div>
       )}
-
+  
       {!showFinalCard && (
         <div className="button-group">
           <button onClick={toggleCamera} className="capture-button secondary">
@@ -214,27 +164,32 @@ const PhotoBooth = () => {
           </button>
         </div>
       )}
-
+  
       {showFinalCard && photos.length === 3 && (
         <>
-          <div className="photo-card">
+          <div className="photo-card" ref={photoCardRef}>
             <div className="photo-strip">
               {photos.map((photo, index) => (
                 <img key={index} src={photo} alt={`Photo ${index + 1}`} className="photo-frame" />
               ))}
             </div>
+            <p className="title-watermark">
+              <img src={watermark} alt="Watermark" className="watermark" /> 
+               Digital Photo 
+              <img src={watermark} alt="Watermark" className="watermark" /> 
+            </p>
           </div>
           <div className="button-group">
             <button onClick={downloadPhotos} className="capture-button">
               <Download className="icon" /> Download Photos
             </button>
-            <button onClick={startCapturing} className="capture-button">
+            <button onClick={reloadPage} className="capture-button">
               <Camera className="icon" /> Take New Photos
             </button>
           </div>
         </>
       )}
-
+  
       <canvas ref={canvasRef} width="480" height="480" className="hidden" />
     </div>
   );
