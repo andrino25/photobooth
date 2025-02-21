@@ -3,8 +3,8 @@ import { Camera, Download, FlipHorizontal } from 'lucide-react';
 import * as faceapi from 'face-api.js';
 import "./Photobooth.css";
 import watermark from "../assets/asd.png";
-import { graduationHat } from '../assets/graduationHat.png';
-import { glassesFilter } from '../assets/glasses.png';
+import graduationHat from '../assets/graduationHat.png';
+import glassesFilter from '../assets/glasses.png';
 
 const PhotoBooth = () => {
   const [capturing, setCapturing] = useState(false);
