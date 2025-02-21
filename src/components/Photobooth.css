@@ -33,6 +33,7 @@ body {
 .camera-container {
   position: relative;
   width: 100%;
+  height: 10px;
   padding-top: 100%; /* 4:3 Aspect Ratio */
   background: black;
   border-radius: 10px;
