@@ -23,7 +23,7 @@ const PhotoBooth = () => {
   const photoCardRef = useRef(null);
   const overlayCanvasRef = useRef(null);
 
-  // Load images
+  // Load image
   useEffect(() => {
     // Replace these paths with your actual image paths
     const loadImages = async () => {
