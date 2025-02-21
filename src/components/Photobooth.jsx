@@ -3,6 +3,8 @@ import { Camera, Download, FlipHorizontal } from 'lucide-react';
 import * as faceapi from 'face-api.js';
 import "./Photobooth.css";
 import watermark from "../assets/asd.png";
+import { graduationHat } from '../assets/graduationHat.png';
+import { glassesFilter } from '../assets/glasses.png';
 
 const PhotoBooth = () => {
   const [capturing, setCapturing] = useState(false);
@@ -28,12 +30,12 @@ const PhotoBooth = () => {
     // Replace these paths with your actual image paths
     const loadImages = async () => {
       const hatImg = new Image();
-      hatImg.src = '/path-to-your-hat-image.png';  // Replace with your hat image path
+      hatImg.src = graduationHat;  // Replace with your hat image path
       await new Promise((resolve) => { hatImg.onload = resolve; });
       setHatImage(hatImg);
 
       const glassesImg = new Image();
-      glassesImg.src = '/path-to-your-glasses-image.png';  // Replace with your glasses image path
+      glassesImg.src = glassesFilter;  // Replace with your glasses image path
       await new Promise((resolve) => { glassesImg.onload = resolve; });
       setGlassesImage(glassesImg);
     };
